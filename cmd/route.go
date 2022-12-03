@@ -7,5 +7,6 @@ func (app *application) routes() {
 	app.router.POST("/user", app.createUser)
 	app.router.POST("/friend", app.addFriend)
 	app.router.POST("/image", app.sendImage)
+	app.router.GET("/friendlist/:user", app.getFriendList)
 
 }

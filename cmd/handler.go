@@ -24,6 +24,7 @@ func (app *application) createUser(c *gin.Context) {
 		return
 	}
 
+	// Insert to DB
 	app.users.Insert(newUser.Name)
 	c.IndentedJSON(http.StatusCreated, newUser)
 
@@ -38,12 +39,23 @@ func (app *application) addFriend(c *gin.Context) {
 		panic(err)
 	}
 
+	// Insert to DB
 	err = app.friendLists.Insert(newFriendList.Me, newFriendList.Friend)
 	if err != nil {
 		fmt.Println(err)
 		panic(err)
 	}
 	c.IndentedJSON(http.StatusCreated, newFriendList)
+
+}
+
+func (app *application) getFriendList(c *gin.Context) {
+	user := c.Param("user")
+	friends, err := app.friendLists.GetList(user)
+	if err != nil {
+		panic(err)
+	}
+	c.IndentedJSON(http.StatusOK, friends)
 
 }
 

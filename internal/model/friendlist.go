@@ -21,3 +21,25 @@ func (m *FriendListlModel) Insert(me string, friend string) error {
 	}
 	return nil
 }
+
+func (m *FriendListlModel) GetList(user string) ([]string, error) {
+	stmt := "SELECT friend FROM gollab_friendlist WHERE me=$1"
+	rows, err := m.DB.Query(stmt, user)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var friends []string
+	for rows.Next() {
+		var friend string
+		err := rows.Scan(&friend)
+		if err != nil {
+			return nil, err
+		}
+
+		friends = append(friends, friend)
+
+	}
+
+	return friends, nil
+}
