@@ -6,14 +6,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"github.com/serenade010/gollab/internal/model"
 )
 
 var hub map[string]*websocket.Conn
-
-type User struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-}
 
 type Image struct {
 	Sender   string `json:"sender"`
@@ -21,42 +17,34 @@ type Image struct {
 	Base64   string `json:"source"`
 }
 
-var users = []User{
-	{ID: "1", Name: "Blue Train"},
-	{ID: "2", Name: "Jeru"},
-	{ID: "3", Name: "Sarah Vaughan and Clifford Brown"},
-}
+func (app *application) createUser(c *gin.Context) {
+	var newUser model.User
 
-func (app *application) getUser(c *gin.Context) {
-	c.IndentedJSON(http.StatusOK, users)
-}
-
-func (app *application) postUser(c *gin.Context) {
-	var newUser User
-
-	// Call BindJSON to bind the received JSON to
-	// newAlbum.
 	if err := c.BindJSON(&newUser); err != nil {
 		return
 	}
 
-	// Add the new album to the slice.
-	users = append(users, newUser)
+	app.users.Insert(newUser.Name)
 	c.IndentedJSON(http.StatusCreated, newUser)
+
 }
 
-func (app *application) getUserByID(c *gin.Context) {
-	id := c.Param("id")
+func (app *application) addFriend(c *gin.Context) {
+	var newFriendList model.FriendList
 
-	// Loop over the list of albums, looking for
-	// an album whose ID value matches the parameter.
-	for _, a := range users {
-		if a.ID == id {
-			c.IndentedJSON(http.StatusOK, a)
-			return
-		}
+	err := c.BindJSON(&newFriendList)
+	if err != nil {
+		fmt.Println(err)
+		panic(err)
 	}
-	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "album not found"})
+
+	err = app.friendLists.Insert(newFriendList.Me, newFriendList.Friend)
+	if err != nil {
+		fmt.Println(err)
+		panic(err)
+	}
+	c.IndentedJSON(http.StatusCreated, newFriendList)
+
 }
 
 func (app *application) SocketHandler(c *gin.Context) {
